@@ -1,0 +1,42 @@
+services:
+  # Backend Node.js
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: pharmavel-backend
+    environment:
+      NODE_ENV: production
+      PORT: 3001
+      DB_HOST: ${DB_HOST:-10.0.0.3}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-pharmavelbd}
+      DB_USER: ${DB_USER:-root}
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET:-pharmavel_secret_key}
+    ports:
+      - "3001:3001"
+    networks:
+      - pharmavel-network
+    restart: unless-stopped
+
+  # Frontend React
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: pharmavel-frontend
+    environment:
+      REACT_APP_API_URL: http://10.0.0.3:3001/api
+      CHOKIDAR_USEPOLLING: true
+    ports:
+      - "3000:3000"
+    networks:
+      - pharmavel-network
+    restart: unless-stopped
+    stdin_open: true
+    tty: true
+
+networks:
+  pharmavel-network:
+    driver: bridge
