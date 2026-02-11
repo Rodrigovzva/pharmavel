@@ -1,41 +1,47 @@
+version: '3.8'
+
 services:
-  # Backend Node.js
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: pharmavel-backend
-    environment:
-      NODE_ENV: production
-      PORT: 3001
-      DB_HOST: ${DB_HOST:-10.0.0.3}
-      DB_PORT: ${DB_PORT:-3306}
-      DB_NAME: ${DB_NAME:-pharmavelbd}
-      DB_USER: ${DB_USER:-root}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET:-pharmavel_secret_key}
     ports:
-      - "3001:3001"
+      - "3100:3000"
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=10.0.0.3
+      - DB_PORT=3306
+      - DB_DATABASE=pharmavelbd
+      - DB_USERNAME=root
+      - DB_PASSWORD=Rvel8080Ipv6**
+      - JWT_SECRET=pharmavel-super-secret-jwt-key-change-in-production
+      - JWT_EXPIRES_IN=1h
+      - JWT_REFRESH_SECRET=pharmavel-refresh-secret-key-change-in-production
+      - JWT_REFRESH_EXPIRES_IN=7d
+    # Volúmenes comentados para producción - usar código compilado en imagen
+    # volumes:
+    #   - ./backend:/app
+    #   - /app/node_modules
     networks:
       - pharmavel-network
     restart: unless-stopped
 
-  # Frontend React
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: pharmavel-frontend
-    environment:
-      REACT_APP_API_URL: http://10.0.0.3:3001/api
-      CHOKIDAR_USEPOLLING: true
     ports:
-      - "3000:3000"
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://10.0.0.3:3100
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     networks:
       - pharmavel-network
     restart: unless-stopped
-    stdin_open: true
-    tty: true
 
 networks:
   pharmavel-network:
